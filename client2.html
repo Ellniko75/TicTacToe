@@ -1,0 +1,183 @@
+<html>
+<header>
+    <link rel="stylesheet" href="app.css">
+</header>
+
+
+<input type="text" id="username" placeholder="username"></input>
+
+
+<input type="text" id="texto" placeholder="mensaje"></input>
+<div id="messagesBox">
+
+</div>
+<div id="main">
+    <h2 id="turn">WAIT FOR TURN</h2>
+    <div class="grid-container" id="0">
+        <div class="grid-item" id="1"></div>
+        <div class="grid-item" id="2"></div>
+        <div class="grid-item" id="3"></div>
+        <div class="grid-item" id="4"></div>
+        <div class="grid-item" id="5"></div>
+        <div class="grid-item" id="6"></div>
+        <div class="grid-item" id="7"></div>
+        <div class="grid-item" id="8"></div>
+        <div class="grid-item" id="9"></div>
+    </div>
+    <h2 id="resultado"></h2>
+</div>
+
+</div>
+
+
+<script>
+
+    const webSocket = new WebSocket('ws://localhost:8080/');
+    /*
+    webSocket.onmessage = (event) => {
+        console.log(JSON.parse(event.data))
+        document.getElementById("messagesBox").innerHTML += `<h3>${JSON.parse(event.data).user}  : ${JSON.parse(event.data).texto} </h3>`
+    }
+    function sendData() {
+        let username = document.getElementById("username").value
+        let texto = document.getElementById("texto").value
+        webSocket.send(JSON.stringify({ user: username, texto: texto }))
+        document.getElementById("texto").value = ""
+    }
+    document.getElementById("texto").addEventListener('keydown', (e) => {
+        if (e.key == 'Enter') {
+            sendData()
+        }
+    })*/
+    let elements = document.querySelectorAll(".grid-item")
+    let play = false
+
+    function checkWin() {
+        return checkRows() || checkColumns() || checkDiagonal()
+
+    }
+    function checkRows() {
+        compare = elements[0].textContent
+        if (compare && elements[1].textContent == compare && elements[2].textContent == compare) {
+            if (compare == "O") {
+                return true
+
+            } else {
+                return false
+            }
+        }
+        compare2 = elements[3].textContent
+
+        if (compare2 && elements[4].textContent == compare2 && elements[5].textContent == compare2) {
+            if (compare2 == "O") {
+                return true
+            } else {
+                return false
+            }
+
+        }
+        compare3 = elements[6].textContent
+        if (compare3 && elements[7].textContent == compare3 && elements[8].textContent == compare3) {
+            if (compare3 == "O") {
+                return true
+            } else {
+                return false
+            }
+        }
+    }
+    function checkColumns() {
+        compare = elements[0].textContent
+        if (compare && elements[3].textContent == compare && elements[6].textContent == compare) {
+            if (compare == "O") {
+                return true
+
+            } else {
+                return false
+            }
+        }
+        compare2 = elements[1].textContent
+
+        if (compare2 && elements[4].textContent == compare2 && elements[7].textContent == compare2) {
+            if (compare2 == "O") {
+                return true
+            } else {
+                return false
+            }
+
+        }
+        compare3 = elements[2].textContent
+
+        if (compare3 && elements[5].textContent == compare3 && elements[8].textContent == compare3) {
+            if (compare3 == "O") {
+                return true
+            } else {
+                return false
+            }
+
+        }
+
+    }
+    function checkDiagonal() {
+        compare = elements[0].textContent
+        if (compare && elements[4].textContent == compare && elements[8].textContent == compare) {
+            if (compare == "O") {
+                return true
+
+            } else {
+                return false
+            }
+        }
+        compare2 = elements[2].textContent
+        if (compare2 && elements[4].textContent == compare2 && elements[6].textContent == compare2) {
+            if (compare2 == "O") {
+                return true
+
+            } else {
+                return false
+            }
+        }
+    }
+
+    webSocket.onmessage = (event) => {
+        data = JSON.parse(event.data)
+        symbol = data.symbol
+        idDiv = parseInt(data.id)
+        console.log(idDiv)
+        elements[idDiv - 1].textContent = symbol
+        if (checkWin()) {
+            document.getElementById("resultado").textContent = "GANASTE HUEVON"
+        }
+        changeTurn()
+    }
+    function getDivOnGridById(id) {
+        for (el of elements) {
+            if (el.id == id) {
+                return el
+            }
+        }
+    }
+
+    for (el of elements) {
+        el.addEventListener("click", function () {
+            sendTicTacToeChoice(this.id)
+        })
+    }
+    function sendTicTacToeChoice(id) {
+        if (play && getDivOnGridById(id).textContent == "") {
+            webSocket.send(JSON.stringify({ id: id, symbol: "O" }))
+
+        }
+
+    }
+
+    function changeTurn() {
+        play = !play
+        if (play) {
+            document.getElementById("turn").textContent = "YOUR TURN"
+        } else {
+            document.getElementById("turn").textContent = "WAIT FOR TURN"
+        }
+    }
+</script>
+
+</html>
